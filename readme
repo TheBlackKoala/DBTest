@@ -1,0 +1,20 @@
+How to run the code:
+
+
+
+
+
+
+
+
+Assumptions about how the code is to work:
+From the example in the case text there are a few things that are not stated clearly which have led to these assumptions.
+
+There are four different taxes:
+Daily
+Weekly
+Monthly
+Yearly
+Daily tax overshadows weekly, monthly and yearly tax, like weekly overshadows monthly and yearly etc. So on a day with a daily tax no other tax will be calculated and on a day with no daily tax but with a weekly tax only this will be calculated.
+
+To avoid throwing errors we return an impossible value on days where no tax is scheduled - Negative Infinity. This is to show that the tax on the day is not set, rather than set to another value, e.g. 0 or 1.
