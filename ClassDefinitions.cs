@@ -23,6 +23,13 @@ namespace TaxSchedule
         private Dictionary<DateTimeRange, float> monthly;
         private Dictionary<DateTimeRange, float> yearly;
 
+        public Municipality(){
+            this.daily=new Dictionary<DateTimeRange, float>();
+            this.weekly=new Dictionary<DateTimeRange, float>();
+            this.monthly=new Dictionary<DateTimeRange, float>();
+            this.yearly=new Dictionary<DateTimeRange, float>();
+        }
+
         public Municipality(Dictionary<DateTimeRange, float> daily,
                             Dictionary<DateTimeRange, float> weekly,
                             Dictionary<DateTimeRange, float> monthly,

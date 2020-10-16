@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace TaxSchedule
 {
+    public class dateParser{
+
+    }
     public class ParseFile{
         private string path;
 
@@ -29,7 +32,7 @@ namespace TaxSchedule
             return duration;
         }
 
-        public TaxSchedule parse(){
+        public TaxSchedule parse(TaxSchedule schedule){
             if(!File.Exists(this.path)){
                 throw new System.ArgumentException("File not found");
             }
@@ -39,10 +42,6 @@ namespace TaxSchedule
                 int count = 0;
                 int state = 0;
                 string name = "";
-                Dictionary<DateTimeRange, float> daily = new Dictionary<DateTimeRange, float>();
-                Dictionary<DateTimeRange, float> weekly = new Dictionary<DateTimeRange, float>();
-                Dictionary<DateTimeRange, float> monthly = new Dictionary<DateTimeRange, float>();
-                Dictionary<DateTimeRange, float> yearly = new Dictionary<DateTimeRange, float>();
                 while ((line = file.ReadLine()) != null){
                     count++;
                     switch (line.ToUpper())
@@ -61,16 +60,6 @@ namespace TaxSchedule
                             continue;
                         case "END":
                             state=0;
-                            try{
-                                municipalities.Add(name.ToUpper(), new Municipality(daily,weekly,monthly, yearly));
-                            }
-                            catch(ArgumentException){
-                                throw new System.ArgumentException("Error adding municipality ending on line " + count.ToString());
-                            }
-                            daily = new Dictionary<DateTimeRange, float>();
-                            weekly = new Dictionary<DateTimeRange, float>();
-                            monthly = new Dictionary<DateTimeRange, float>();
-                            yearly = new Dictionary<DateTimeRange, float>();
                             continue;
                         default:
                             //Values in scope for later cases
@@ -94,12 +83,13 @@ namespace TaxSchedule
                             switch (state)
                             {
                                 case 0:
+                                    schedule.addMunicipality(line.ToUpper(), new Municipality());
                                     name=line;
                                     break;
                                 case 1:
                                     try{
                                         //Add the values to the dictionary
-                                        daily.Add(duration,tax);
+                                        schedule.addDaily(name,duration,tax);
                                     }
                                     catch (ArgumentException){
                                         throw new System.ArgumentException("Error inserting entry from line" + count.ToString());
@@ -108,7 +98,7 @@ namespace TaxSchedule
                                 case 2:
                                     try{
                                         //Add the values to the dictionary
-                                        weekly.Add(duration,tax);
+                                        schedule.addWeekly(name,duration,tax);
                                     }
                                     catch (ArgumentException){
                                         throw new System.ArgumentException("Error inserting entry from line" + count.ToString());
@@ -117,7 +107,7 @@ namespace TaxSchedule
                                 case 3:
                                     try{
                                         //Add the values to the dictionary
-                                        monthly.Add(duration,tax);
+                                        schedule.addMonthly(name,duration,tax);
                                     }
                                     catch (ArgumentException){
                                         throw new System.ArgumentException("Error inserting entry from line" + count.ToString());
@@ -126,7 +116,7 @@ namespace TaxSchedule
                                 case 4:
                                     try{
                                         //Add the values to the dictionary
-                                        yearly.Add(duration,tax);
+                                        schedule.addYearly(name,duration,tax);
                                     }
                                     catch (ArgumentException){
                                         throw new System.ArgumentException("Error inserting entry from line" + count.ToString());
@@ -136,17 +126,8 @@ namespace TaxSchedule
                             break;
                     }
                 }
-                //If the last municipality has not been ended, add it to the list
-                if(state!=0){
-                    try{
-                        municipalities.Add(name.ToUpper(), new Municipality(daily,weekly,monthly, yearly));
-                    }
-                    catch(ArgumentException){
-                        throw new System.ArgumentException("Error adding municipality ending on line" + count.ToString());
-                    }
-                }
             }
-            return new TaxSchedule(municipalities);
+            return schedule;
         }
     }
 }
