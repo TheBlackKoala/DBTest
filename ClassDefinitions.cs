@@ -3,64 +3,67 @@ using System.Collections.Generic;
 
 namespace TaxSchedule
 {
-    public static class TaxInstance{
-        public TaxInstance(DateTime start, DateTine end, float tax){
-            this.start=start;
-            this.end=end;
-            this.tax=tax;
-        }
-
+    public class DateTimeRange{
         private DateTime start;
         private DateTime end;
-        private float tax;
 
-        public DateTime getStartDate(){
-            return this.start;
+        public DateTimeRange(DateTime start, DateTime end){
+            this.start=start;
+            this.end=end;
         }
 
-        public DateTime getEndDate(){
-            return this.end;
-        }
-
-        public float getTax(){
-            return this.tax;
-        }
-
-        public boolean isDuring(DateTime currentDate){
+        public Boolean isDuring(DateTime currentDate){
             return (this.start <= currentDate) && (currentDate <= this.end);
         }
     }
 
-    public static class Municipality{
-        private Dictionary<TaxInstance> yearly;
-        private Dictionary<TaxInstance> monthly;
-        private Dictionary<TaxInstance> weekly;
-        private Dictionary<TaxInstance> daily;
+    public class Municipality{
+        private Dictionary<DateTimeRange, float> daily;
+        private Dictionary<DateTimeRange, float> weekly;
+        private Dictionary<DateTimeRange, float> monthly;
+        private Dictionary<DateTimeRange, float> yearly;
 
-        public Municipality(string name,
-                            Dictionary<TaxInstance> daily,
-                            Dictionary<TaxInstance> weekly,
-                            Dictionary<TaxInstance> monthly,
-                            Dictionary<TaxInstance> yearly)
+        public Municipality(Dictionary<DateTimeRange, float> daily,
+                            Dictionary<DateTimeRange, float> weekly,
+                            Dictionary<DateTimeRange, float> monthly,
+                            Dictionary<DateTimeRange, float> yearly)
         {
-            
+            this.daily=daily;
+            this.weekly=weekly;
+            this.monthly=monthly;
+            this.yearly=yearly;
         }
 
         public float getTax(DateTime currentDate){
             //Check daily
-
+            foreach((DateTimeRange duration, float tax) in this.daily){
+                if(duration.isDuring(currentDate)){
+                    return tax;
+                }
+            }
             //Check weekly
-
+            foreach((DateTimeRange duration, float tax) in this.weekly){
+                if(duration.isDuring(currentDate)){
+                    return tax;
+                }
+            }
             //Check monthly
-
+            foreach((DateTimeRange duration, float tax) in this.monthly){
+                if(duration.isDuring(currentDate)){
+                    return tax;
+                }
+            }
             //Check yearly
-
-            //Return -infinity if there is no tax scheduled.
-            return float.NegativeInfinity;
+            foreach((DateTimeRange duration, float tax) in this.yearly){
+                if(duration.isDuring(currentDate)){
+                    return tax;
+                }
+            }
+            throw new System.ArgumentException("Tax not found");
         }
     }
 
-    public static class TaxSchedule{
+    public class TaxSchedule{
         private Dictionary<string, Municipality> municipalities;
 
         public TaxSchedule(){
@@ -72,7 +75,7 @@ namespace TaxSchedule
         }
 
         //Add a municipality, returns true if it succeeded, false otherwise.
-        public boolean addMunicipality(string name, Municipality municipality){
+        public Boolean addMunicipality(string name, Municipality municipality){
             try{
                 this.municipalities.Add(name,municipality);
             }
@@ -80,6 +83,15 @@ namespace TaxSchedule
                 return false;
             }
             return true;
+        }
+
+        public float getTax(string municipality, DateTime date){
+            try{
+                return municipalities[municipality].getTax(date);
+            }
+            catch (KeyNotFoundException) {
+                throw new System.ArgumentException("Municipality not found", municipality);
+            }
         }
     }
 }
