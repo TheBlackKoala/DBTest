@@ -61,9 +61,50 @@ namespace TaxSchedule
             }
             throw new System.ArgumentException("Tax not found");
         }
+
+        public Boolean addDaily(DateTimeRange duration, float tax){
+            try{
+                daily.Add(duration,tax);
+            }
+            catch{
+                return false;
+            }
+            return true;
+        }
+
+        public Boolean addWeekly(DateTimeRange duration, float tax){
+            try{
+                weekly.Add(duration,tax);
+            }
+            catch{
+                return false;
+            }
+            return true;
+        }
+
+        public Boolean addMonthly(DateTimeRange duration, float tax){
+            try{
+                monthly.Add(duration,tax);
+            }
+            catch{
+                return false;
+            }
+            return true;
+        }
+
+        public Boolean addYearly(DateTimeRange duration, float tax){
+            try{
+                yearly.Add(duration,tax);
+            }
+            catch{
+                return false;
+            }
+            return true;
+        }
     }
 
     public class TaxSchedule{
+        //All municipality names need to be uppercase, this is to make the names case-insensitive
         private Dictionary<string, Municipality> municipalities;
 
         public TaxSchedule(){
@@ -77,7 +118,7 @@ namespace TaxSchedule
         //Add a municipality, returns true if it succeeded, false otherwise.
         public Boolean addMunicipality(string name, Municipality municipality){
             try{
-                this.municipalities.Add(name,municipality);
+                this.municipalities.Add(name.ToUpper(),municipality);
             }
             catch(ArgumentException){
                 return false;
@@ -85,9 +126,45 @@ namespace TaxSchedule
             return true;
         }
 
+        public Boolean addDaily(string name, DateTimeRange duration, float tax){
+            try{
+                return this.municipalities[name.ToUpper()].addDaily(duration,tax);
+            }
+            catch (KeyNotFoundException) {
+                return false;
+            }
+        }
+
+        public Boolean addWeekly(string name, DateTimeRange duration, float tax){
+            try{
+                return this.municipalities[name.ToUpper()].addWeekly(duration,tax);
+            }
+            catch (KeyNotFoundException) {
+                return false;
+            }
+        }
+
+        public Boolean addMonthly(string name, DateTimeRange duration, float tax){
+            try{
+                return this.municipalities[name.ToUpper()].addMonthly(duration,tax);
+            }
+            catch (KeyNotFoundException) {
+                return false;
+            }
+        }
+
+        public Boolean addYearly(string name, DateTimeRange duration, float tax){
+            try{
+                return this.municipalities[name.ToUpper()].addYearly(duration,tax);
+            }
+            catch (KeyNotFoundException) {
+                return false;
+            }
+        }
+
         public float getTax(string municipality, DateTime date){
             try{
-                return municipalities[municipality].getTax(date);
+                return this.municipalities[municipality.ToUpper()].getTax(date);
             }
             catch (KeyNotFoundException) {
                 throw new System.ArgumentException("Municipality not found", municipality);

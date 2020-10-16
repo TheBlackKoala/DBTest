@@ -62,7 +62,7 @@ namespace TaxSchedule
                         case "END":
                             state=0;
                             try{
-                                municipalities.Add(name, new Municipality(daily,weekly,monthly, yearly));
+                                municipalities.Add(name.ToUpper(), new Municipality(daily,weekly,monthly, yearly));
                             }
                             catch(ArgumentException){
                                 throw new System.ArgumentException("Error adding municipality ending on line " + count.ToString());
@@ -139,7 +139,7 @@ namespace TaxSchedule
                 //If the last municipality has not been ended, add it to the list
                 if(state!=0){
                     try{
-                        municipalities.Add(name, new Municipality(daily,weekly,monthly, yearly));
+                        municipalities.Add(name.ToUpper(), new Municipality(daily,weekly,monthly, yearly));
                     }
                     catch(ArgumentException){
                         throw new System.ArgumentException("Error adding municipality ending on line" + count.ToString());
