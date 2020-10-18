@@ -12,28 +12,28 @@ namespace TaxSchedule
             this.end=end;
         }
 
-        public Boolean isDuring(DateTime currentDate){
+        public Boolean IsDuring(DateTime currentDate){
             return (this.start <= currentDate) && (currentDate <= this.end);
         }
     }
 
     public class Municipality{
-        private Dictionary<DateTimeRange, float> daily;
-        private Dictionary<DateTimeRange, float> weekly;
-        private Dictionary<DateTimeRange, float> monthly;
-        private Dictionary<DateTimeRange, float> yearly;
+        private List<(DateTimeRange, float)> daily;
+        private List<(DateTimeRange, float)> weekly;
+        private List<(DateTimeRange, float)> monthly;
+        private List<(DateTimeRange, float)> yearly;
 
         public Municipality(){
-            this.daily=new Dictionary<DateTimeRange, float>();
-            this.weekly=new Dictionary<DateTimeRange, float>();
-            this.monthly=new Dictionary<DateTimeRange, float>();
-            this.yearly=new Dictionary<DateTimeRange, float>();
+            this.daily=new List<(DateTimeRange, float)>();
+            this.weekly=new List<(DateTimeRange, float)>();
+            this.monthly=new List<(DateTimeRange, float)>();
+            this.yearly=new List<(DateTimeRange, float)>();
         }
 
-        public Municipality(Dictionary<DateTimeRange, float> daily,
-                            Dictionary<DateTimeRange, float> weekly,
-                            Dictionary<DateTimeRange, float> monthly,
-                            Dictionary<DateTimeRange, float> yearly)
+        public Municipality(List<(DateTimeRange, float)> daily,
+                            List<(DateTimeRange, float)> weekly,
+                            List<(DateTimeRange, float)> monthly,
+                            List<(DateTimeRange, float)> yearly)
         {
             this.daily=daily;
             this.weekly=weekly;
@@ -41,71 +41,51 @@ namespace TaxSchedule
             this.yearly=yearly;
         }
 
-        public float getTax(DateTime currentDate){
+        public float GetTax(DateTime currentDate){
             //Check daily
             foreach((DateTimeRange duration, float tax) in this.daily){
-                if(duration.isDuring(currentDate)){
+                if(duration.IsDuring(currentDate)){
                     return tax;
                 }
             }
             //Check weekly
             foreach((DateTimeRange duration, float tax) in this.weekly){
-                if(duration.isDuring(currentDate)){
+                if(duration.IsDuring(currentDate)){
                     return tax;
                 }
             }
             //Check monthly
             foreach((DateTimeRange duration, float tax) in this.monthly){
-                if(duration.isDuring(currentDate)){
+                if(duration.IsDuring(currentDate)){
                     return tax;
                 }
             }
             //Check yearly
             foreach((DateTimeRange duration, float tax) in this.yearly){
-                if(duration.isDuring(currentDate)){
+                if(duration.IsDuring(currentDate)){
                     return tax;
                 }
             }
-            throw new System.ArgumentException("Tax not found");
+            throw new ArgumentException("Tax not found");
         }
 
-        public Boolean addDaily(DateTimeRange duration, float tax){
-            try{
-                daily.Add(duration,tax);
-            }
-            catch{
-                return false;
-            }
+        public bool AddDaily(DateTimeRange duration, float tax){
+            daily.Add((duration,tax));
             return true;
         }
 
-        public Boolean addWeekly(DateTimeRange duration, float tax){
-            try{
-                weekly.Add(duration,tax);
-            }
-            catch{
-                return false;
-            }
+        public bool AddWeekly(DateTimeRange duration, float tax){
+            weekly.Add((duration,tax));
             return true;
         }
 
-        public Boolean addMonthly(DateTimeRange duration, float tax){
-            try{
-                monthly.Add(duration,tax);
-            }
-            catch{
-                return false;
-            }
+        public bool AddMonthly(DateTimeRange duration, float tax){
+            monthly.Add((duration,tax));
             return true;
         }
 
-        public Boolean addYearly(DateTimeRange duration, float tax){
-            try{
-                yearly.Add(duration,tax);
-            }
-            catch{
-                return false;
-            }
+        public bool AddYearly(DateTimeRange duration, float tax){
+            yearly.Add((duration,tax));
             return true;
         }
     }
@@ -123,58 +103,61 @@ namespace TaxSchedule
         }
 
         //Add a municipality, returns true if it succeeded, false otherwise.
-        public Boolean addMunicipality(string name, Municipality municipality){
-            try{
-                this.municipalities.Add(name.ToUpper(),municipality);
-            }
-            catch(ArgumentException){
-                return false;
-            }
-            return true;
+        public bool AddMunicipality(string name, Municipality municipality){
+            return this.municipalities.TryAdd(name.ToUpperInvariant(),municipality);
         }
 
-        public Boolean addDaily(string name, DateTimeRange duration, float tax){
+        public bool AddMunicipality(string name){
+            return this.municipalities.TryAdd(name.ToUpperInvariant(),new Municipality());
+        }
+
+        public bool AddDaily(string name, DateTimeRange duration, float tax){
             try{
-                return this.municipalities[name.ToUpper()].addDaily(duration,tax);
+                return this.municipalities[name.ToUpperInvariant()]
+                    .AddDaily(duration,tax);
             }
             catch (KeyNotFoundException) {
                 return false;
             }
         }
 
-        public Boolean addWeekly(string name, DateTimeRange duration, float tax){
+        public bool AddWeekly(string name, DateTimeRange duration, float tax){
             try{
-                return this.municipalities[name.ToUpper()].addWeekly(duration,tax);
+                return this.municipalities[name.ToUpperInvariant()]
+                    .AddWeekly(duration,tax);
             }
             catch (KeyNotFoundException) {
                 return false;
             }
         }
 
-        public Boolean addMonthly(string name, DateTimeRange duration, float tax){
+        public bool AddMonthly(string name, DateTimeRange duration, float tax){
             try{
-                return this.municipalities[name.ToUpper()].addMonthly(duration,tax);
+                return this.municipalities[name.ToUpperInvariant()]
+                    .AddMonthly(duration,tax);
             }
             catch (KeyNotFoundException) {
                 return false;
             }
         }
 
-        public Boolean addYearly(string name, DateTimeRange duration, float tax){
+        public bool AddYearly(string name, DateTimeRange duration, float tax){
             try{
-                return this.municipalities[name.ToUpper()].addYearly(duration,tax);
+                return this.municipalities[name.ToUpperInvariant()]
+                    .AddYearly(duration,tax);
             }
             catch (KeyNotFoundException) {
                 return false;
             }
         }
 
-        public float getTax(string municipality, DateTime date){
+        public float GetTax(string municipality, DateTime date){
             try{
-                return this.municipalities[municipality.ToUpper()].getTax(date);
+                return this.municipalities[municipality.ToUpperInvariant()]
+                    .GetTax(date);
             }
             catch (KeyNotFoundException) {
-                throw new System.ArgumentException("Municipality not found", municipality);
+                throw new ArgumentException("Municipality not found", municipality);
             }
         }
     }

@@ -14,29 +14,24 @@ namespace TaxSchedule
             this.path=path;
         }
 
-        public DateTime stringToDate(string date){
-            string[] times = date.Split('.',6);
-            DateTime time = new DateTime(Int32.Parse(times[0]),
-                                         Int32.Parse(times[1]),
-                                         Int32.Parse(times[2]),
-                                         Int32.Parse(times[3]),
-                                         Int32.Parse(times[4]),
-                                         Int32.Parse(times[5]));
-            return time;
+        public static DateTime StringToDate(string date){
+            return DateTime.ParseExact(date, "yyyy.MM.dd", System.Globalization.CultureInfo.InvariantCulture);
         }
 
-        public DateTimeRange stringsToDuration(string start, string end){
-            DateTime starts = stringToDate(start+".0.0.0");
-            DateTime ends = stringToDate(end+".23.59.59");
+        public static DateTimeRange StringsToDuration(string start, string end){
+            DateTime starts = StringToDate(start);
+            //Make the end time the last second of the end date
+            DateTime ends = StringToDate(end)
+                .AddDays(1)
+                .AddSeconds(-1);
             DateTimeRange duration = new DateTimeRange(starts,ends);
             return duration;
         }
 
-        public TaxSchedule parse(TaxSchedule schedule){
+        public TaxSchedule Parse(TaxSchedule schedule){
             if(!File.Exists(this.path)){
                 throw new System.ArgumentException("File not found");
             }
-            Dictionary<string, Municipality> municipalities = new Dictionary<string, Municipality>();
             using (StreamReader file = File.OpenText(path)){
                 string line;
                 int count = 0;
@@ -44,7 +39,7 @@ namespace TaxSchedule
                 string name = "";
                 while ((line = file.ReadLine()) != null){
                     count++;
-                    switch (line.ToUpper())
+                    switch (line.ToUpperInvariant())
                     {
                         case "DAILY":
                             state = 1;
@@ -72,7 +67,7 @@ namespace TaxSchedule
                                 ls = line.Split(" ",3);
                                 try{
                                     //Create the duration
-                                    duration = stringsToDuration(ls[0],ls[1]);
+                                    duration = StringsToDuration(ls[0],ls[1]);
                                     //Find the tax value
                                     tax = float.Parse(ls[2]);
                                 }
@@ -83,43 +78,28 @@ namespace TaxSchedule
                             switch (state)
                             {
                                 case 0:
-                                    schedule.addMunicipality(line.ToUpper(), new Municipality());
+                                    schedule.AddMunicipality(line.ToUpperInvariant());
                                     name=line;
                                     break;
                                 case 1:
-                                    try{
-                                        //Add the values to the dictionary
-                                        schedule.addDaily(name,duration,tax);
-                                    }
-                                    catch (ArgumentException){
-                                        throw new System.ArgumentException("Error inserting entry from line" + count.ToString());
+                                    //Add the values to the dictionary, catch errors
+                                    if(!schedule.AddDaily(name,duration,tax)){
+                                        throw new ArgumentException("Error inserting entry from line {count}");
                                     }
                                     break;
                                 case 2:
-                                    try{
-                                        //Add the values to the dictionary
-                                        schedule.addWeekly(name,duration,tax);
-                                    }
-                                    catch (ArgumentException){
-                                        throw new System.ArgumentException("Error inserting entry from line" + count.ToString());
+                                    if(!schedule.AddWeekly(name,duration,tax)){
+                                        throw new ArgumentException("Error inserting entry from line {count}");
                                     }
                                     break;
                                 case 3:
-                                    try{
-                                        //Add the values to the dictionary
-                                        schedule.addMonthly(name,duration,tax);
-                                    }
-                                    catch (ArgumentException){
-                                        throw new System.ArgumentException("Error inserting entry from line" + count.ToString());
+                                    if(!schedule.AddMonthly(name,duration,tax)){
+                                        throw new ArgumentException("Error inserting entry from line {count}");
                                     }
                                     break;
                                 case 4:
-                                    try{
-                                        //Add the values to the dictionary
-                                        schedule.addYearly(name,duration,tax);
-                                    }
-                                    catch (ArgumentException){
-                                        throw new System.ArgumentException("Error inserting entry from line" + count.ToString());
+                                    if(!schedule.AddYearly(name,duration,tax)){
+                                        throw new ArgumentException("Error inserting entry from line {count}");
                                     }
                                     break;
                             }

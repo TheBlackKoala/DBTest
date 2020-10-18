@@ -5,59 +5,115 @@ using System.Collections.Generic;
 namespace TaxSchedule
 {
     public class Client{
-        TaxSchedule tax;
+        TaxSchedule schedule;
 
-        public Client(TaxSchedule tax){
-            this.tax = tax;
+        public Client(TaxSchedule schedule){
+            this.schedule = schedule;
         }
 
         public Client(){
-            this.tax=new TaxSchedule();
+            this.schedule=new TaxSchedule();
         }
 
         //True to continue, false to stop that part of the program
-        private receiveInput(string* input){
-            *input = Console.ReadLine();
-            if(input.ToUpper() == "Q"){
+        private static bool ReceiveInput(out string input){
+            input = Console.ReadLine();
+            if(input.ToUpperInvariant() == "Q"){
                 return false;
             }
             return true;
         }
 
-        public void tutorial(){
+        public void Tutorial(){
             Console.WriteLine("Enter T to see this tutorial again");
-
-
-            
+            //Record adding tutorial
+            Console.WriteLine("Enter A to add a record");
+            Console.WriteLine("You can add a municipality or a daily, weekly, monthly or yearly tax.");
+            Console.WriteLine("The input formats are as follows:");
+            Console.WriteLine("The name of a municipality is any string: fx Copenhagen or Høje Taastrup");
+            Console.WriteLine("The names are not case sensitive and need to be unique");
+            Console.WriteLine("Dates are in the format YYYY.MM.DD");
+            Console.WriteLine("For example the 1st of april 2016 will be 2016.04.01");
+            Console.WriteLine("The tax format is N,N.");
+            Console.WriteLine("For example a tax level could be 0,2");
+            //Finding tax tutorial
+            Console.WriteLine("Enter C to check a tax");
+            Console.WriteLine("You need to enter a municipality and date and the tax in the given municipality on the given day will be shown");
+            //Importing tutorial
+            Console.WriteLine("Enter I to import data from a file");
+            Console.WriteLine("You need to enter the complete path to the file you want to import, both relative and complete works");
+            Console.WriteLine("The format is as follows:");
+            Console.WriteLine("The first line is the Municipality name");
+            Console.WriteLine("Next is a couple of options:");
+            Console.WriteLine("The line \"Daily\" will mark the start of Daily records");
+            Console.WriteLine("Likewise \"Weekly\", \"Monthly\" or \"Yearly\" will start the appropriate records");
+            Console.WriteLine("After this comes the date and tax info: start-date end-date tax");
+            Console.WriteLine("The date formats are YYYY.MM.DD and the tax format is N,N");
+            Console.WriteLine("A line could look like this:");
+            Console.WriteLine("2016.01.01 2016.01.01 0,2");
+            Console.WriteLine("When the records for the given municipality are done the last line has to be \"End\" to mark the end of the current Municipality");
+            Console.WriteLine("After ending the municipality the next line will be a new municipality name and can continue on like described");
+            //Regular info
             Console.WriteLine("Enter H to see the simple help");
             Console.WriteLine("Enter R to see the readme for this project which contains aditional information not covered here");
             Console.WriteLine("Enter Q to exit the program, shutting this interactive client off");
             Console.WriteLine("Enter Q during an action to stop the current action");
         }
 
-        public void getRecord(){
+        public void GetRecord(){
             Console.WriteLine("Please enther the municipality that you want to get a record from");
             string name = "";
-            if(!reeiveInput(&name)){
-                break;
+            if(!ReceiveInput(out name)){
+                return;
             }
             Console.WriteLine("Please enter the date you want in the format of YYYY.MM.DD");
             string date = "";
-            if(!reeiveInput(&date)){
-                break;
+            if(!ReceiveInput(out date)){
+                return;
             }
-            //LOOK HERE!!!!
-            
-                                                                       
-            
-            
-            
-            DateTime time = new ParseFile(".").stringToDate(date);
-            float res = tax.getTax(name,time);
+            DateTime time = DateTime.ParseExact(date, "yyyy.MM.dd", System.Globalization.CultureInfo.InvariantCulture);
+            float res = schedule.GetTax(name,time);
             Console.WriteLine("The tax in {0}, on {1} is: {2}", name, time, res);
+            return;
         }
 
-        public void addRecord(){
+        public static bool GetRecordInfo(out string name, out DateTimeRange duration, out float tax){
+            duration = null;
+            name = "";
+            tax = 0;
+            //Get municipality name and then dates
+            Console.WriteLine("Please enter the name of the Municipality you want to add a daily tax to");
+            if(!ReceiveInput(out name)){
+                return false;
+            }
+            Console.WriteLine("Please enter the start date of the tax in the format of YYYY.MM.DD");
+            string start = "";
+            if(!ReceiveInput(out start)){
+                return false;
+            }
+            Console.WriteLine("Please enter the end date of the tax in the format of YYYY.MM.DD");
+            string end = "";
+            if(!ReceiveInput(out end)){
+                return false;
+            }
+            Console.WriteLine("Please enter the level of the tax in the format of N,N");
+            string level = "";
+            if(!ReceiveInput(out level)){
+                return false;
+            }
+            try{
+                //Parse the tax value into a float
+                tax = float.Parse(level);
+            }
+            catch{
+                Console.WriteLine("Could not parse the tax given");
+                return false;
+            }
+            duration = ParseFile.StringsToDuration(start,end);
+            return true;
+        }
+
+        public void AddRecord(){
             Console.WriteLine("What do you want to add to the records?");
             Console.WriteLine("Enter M to add a Municipality");
             Console.WriteLine("Enter D to add a Daily tax to a municipality");
@@ -65,68 +121,76 @@ namespace TaxSchedule
             Console.WriteLine("Enter T to add a Monthly tax to a municipality");
             Console.WriteLine("Enter Y to add a Yearly tax to a municipality");
             string command = Console.ReadLine();
-            switch (command.ToUpper()[0])
+            string name = "";
+            //Used in all but the municipality case
+            DateTimeRange duration;
+            float tax;
+            switch (command.ToUpperInvariant()[0])
             {
                 case 'M':
                     Console.WriteLine("Please enter the name of the municipality you want to add");
-                    string name = "";
-                    if(!reeiveInput(&name)){
+                    if(!ReceiveInput(out name)){
                         break;
                     }
-                    //Add the municipality
-                    try{
-                        tax.addMunicipality(name.ToUpper());
+                    //Try to add the municipality and give the according response
+                    if(schedule.AddMunicipality(name.ToUpperInvariant())){
                         Console.WriteLine("Municipality {0} was inserted into the tax schedule", name);
                     }
-                    catch{
+                    else{
                         Console.WriteLine("Something went wrong when inserting Municipality {0}, please make sure that it is not there already, this is NOT case sensitive.", name);
                     }
                     break;
                 case 'D':
-                    //Get municipality name and then dates
-                    Console.WriteLine("Please enter the name of the Municipality you want to add a daily tax to");
-                    string name = "";
-                    if(!reeiveInput(&name)){
+                    //Get the information for the record
+                    if(!GetRecordInfo(out name, out duration, out tax)){
                         break;
                     }
-                    Console.WriteLine("Please enter the start date of the tax");
-                    string start = "";
-                    if(!reeiveInput(&start)){
+                    if(!this.schedule.AddDaily(name,duration,tax)){
+                        Console.WriteLine("Could not add the daily tax you entered");
+                    }
+                    break;
+                case 'W':
+                    //Get the information for the record
+                    if(!GetRecordInfo(out name, out duration, out tax)){
                         break;
                     }
-                    Console.WriteLine("Please enter the end date of the tax");
-                    string end = "";
-                    if(!reeiveInput(&end)){
+                    if(!this.schedule.AddWeekly(name,duration,tax)){
+                        Console.WriteLine("Could not add the weekly tax you entered");
+                    }
+                    break;
+                case 'T':
+                    //Get the information for the record
+                    if(!GetRecordInfo(out name, out duration, out tax)){
                         break;
                     }
-                    Console.WriteLine("Please enter the level of the tax");
-                    string level = "";
-                    if(!reeiveInput(&level)){
+                    if(!this.schedule.AddMonthly(name,duration,tax)){
+                        Console.WriteLine("Could not add the monthly tax you entered");
+                    }
+                    break;
+                case 'Y':
+                    //Get the information for the record
+                    if(!GetRecordInfo(out name, out duration, out tax)){
                         break;
                     }
-                    
+                    if(!this.schedule.AddYearly(name,duration,tax)){
+                        Console.WriteLine("Could not add the yearly tax you entered");
+                    }
                     break;
             }
         }
 
-        public void checkTax(){
-
-
-            
-        }
-
-        public void import(){
+        public void Import(){
             Console.WriteLine("What file would like to import from?");
             Console.WriteLine("Please include full or complete relative path to the file");
             string path = Console.ReadLine();
             ParseFile parser = new ParseFile(path);
-            parser.parse(this.tax);
+            parser.Parse(this.schedule);
         }
 
-        public void help(){
+        public void Help(){
             Console.WriteLine("Enter T for a tutorial");
             Console.WriteLine("Enter A to add a record");
-            Console.WriteLine("Enter C to check a tax");
+            Console.WriteLine("Enter G to get the tax for a given municipality and date");
             Console.WriteLine("Enter I to import data from a file");
             Console.WriteLine("Enter H to see this help again");
             Console.WriteLine("Enter R to see the readme for this project");
@@ -134,7 +198,7 @@ namespace TaxSchedule
             Console.WriteLine("Enter Q during an action to stop the current action");
         }
 
-        public void readme(){
+        public void Readme(){
             Console.WriteLine("This is the contents of the readme file for this project:");
             using (StreamReader file = File.OpenText("./readme")){
                 Console.Write(file.ReadToEnd());
@@ -145,35 +209,36 @@ namespace TaxSchedule
             Console.WriteLine("Hey there.");
             Console.WriteLine("Welcome to this municipality tax program.");
             Console.WriteLine("Please let me know how i can help.");
-            help();
+            Help();
             for(;;){
+                Console.WriteLine("Please enter a command");
                 string command = Console.ReadLine();
-                switch(command.ToUpper()[0])
+                switch(command.ToUpperInvariant()[0])
                 {
                     case 'T':
-                        tutorial();
+                        Tutorial();
                         break;
                     case 'A':
-                        addRecord();
+                        AddRecord();
                         break;
-                    case 'C':
-                        checkTax();
+                    case 'G':
+                        GetRecord();
                         break;
                     case 'I':
-                        import();
+                        Import();
                         break;
                     case 'H':
-                        help();
+                        Help();
                         break;
                     case 'R':
-                        readme();
+                        Readme();
                         break;
                     case 'Q':
                         Console.WriteLine("Goodbye");
                         return;
                     default:
                         Console.WriteLine("Unknown command, see description below for commands");
-                        help();
+                        Help();
                         break;
                 }
             }
@@ -189,18 +254,20 @@ namespace TaxSchedule
         public static void Main(string[] args)
         {
             var parser = new ParseFile("municipalities.txt");
-            var tax = new TaxSchedule();
-            tax = parser.parse(tax);
-            float res = tax.getTax("Copenhagen",new DateTime(2016,01,01));
+            var schedule = new TaxSchedule();
+            schedule = parser.Parse(schedule);
+            float res = schedule.GetTax("Copenhagen",new DateTime(2016,01,01));
             Console.WriteLine(res);
-            res = tax.getTax("Copenhagen",new DateTime(2016,12,25));
+            res = schedule.GetTax("Copenhagen",new DateTime(2016,12,25));
             Console.WriteLine(res);
-            res = tax.getTax("Copenhagen",new DateTime(2016,05,02));
+            res = schedule.GetTax("Copenhagen",new DateTime(2016,05,02));
             Console.WriteLine(res);
-            res = tax.getTax("Copenhagen",new DateTime(2016,07,10));
+            res = schedule.GetTax("Copenhagen",new DateTime(2016,07,10));
             Console.WriteLine(res);
-            res = tax.getTax("Copenhagen",new DateTime(2016,03,16));
+            res = schedule.GetTax("Copenhagen",new DateTime(2016,03,16));
             Console.WriteLine(res);
+            var client = new Client(schedule);
+            client.StartActivity();
         }
     }
 }
