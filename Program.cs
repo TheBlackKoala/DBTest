@@ -61,27 +61,42 @@ namespace TaxSchedule
         }
 
         public void GetRecord(){
+            //Get the municipality
             Console.WriteLine("Please enther the municipality that you want to get a record from");
             string name = "";
             if(!ReceiveInput(out name)){
                 return;
             }
+
+            //Receive the date
             Console.WriteLine("Please enter the date you want in the format of YYYY.MM.DD");
             string date = "";
             if(!ReceiveInput(out date)){
                 return;
             }
-            DateTime time = DateTime.ParseExact(date, "yyyy.MM.dd", System.Globalization.CultureInfo.InvariantCulture);
-            float res = schedule.GetTax(name,time);
-            Console.WriteLine("The tax in {0}, on {1} is: {2}", name, time, res);
+
+            //Parse the date and find the tax
+            try{
+                DateTime time = DateTime.ParseExact(date, "yyyy.MM.dd", System.Globalization.CultureInfo.InvariantCulture);
+                float res = schedule.GetTax(name,time);
+                Console.WriteLine("The tax in {0}, on {1} is: {2}", name, time, res);
+            }
+            catch (FormatException e){
+                Console.WriteLine("Failed to convert string into a date with the following message: " + e.Message);
+            }
+            catch (ArgumentException e){
+                Console.WriteLine("Failed to find a tax with the following error: " + e.Message);
+            }
             return;
         }
 
+        //Helper function for receiving info for a new record, works for all four different tax-types.
         public static bool GetRecordInfo(out string name, out DateTimeRange duration, out float tax){
+            //We need to write to the references before returning
             duration = null;
             name = "";
             tax = 0;
-            //Get municipality name and then dates
+            //Get municipality name, dates and tax
             Console.WriteLine("Please enter the name of the Municipality you want to add a daily tax to");
             if(!ReceiveInput(out name)){
                 return false;
@@ -109,7 +124,12 @@ namespace TaxSchedule
                 Console.WriteLine("Could not parse the tax given");
                 return false;
             }
-            duration = ParseFile.StringsToDuration(start,end);
+            try{
+                duration = ParseFile.StringsToDuration(start,end);
+            }
+            catch (FormatException e){
+                Console.WriteLine("Failed to convert strings into date with the following error message: " + e.Message);
+            }
             return true;
         }
 
@@ -184,7 +204,12 @@ namespace TaxSchedule
             Console.WriteLine("Please include full or complete relative path to the file");
             string path = Console.ReadLine();
             ParseFile parser = new ParseFile(path);
-            parser.Parse(this.schedule);
+            try{
+                parser.Parse(this.schedule);
+            }
+            catch(ArgumentException e){
+                Console.WriteLine("Importing the file failed with error message \"{0}\"", e.Message);
+            }
         }
 
         public void Help(){

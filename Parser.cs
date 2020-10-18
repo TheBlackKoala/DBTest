@@ -4,9 +4,6 @@ using System.Collections.Generic;
 
 namespace TaxSchedule
 {
-    public class dateParser{
-
-    }
     public class ParseFile{
         private string path;
 
@@ -78,28 +75,30 @@ namespace TaxSchedule
                             switch (state)
                             {
                                 case 0:
-                                    schedule.AddMunicipality(line.ToUpperInvariant());
+                                    if(!schedule.AddMunicipality(line.ToUpperInvariant())){
+                                        throw new ArgumentException("Could not insert Municipality "+line);
+                                    }
                                     name=line;
                                     break;
                                 case 1:
                                     //Add the values to the dictionary, catch errors
                                     if(!schedule.AddDaily(name,duration,tax)){
-                                        throw new ArgumentException("Error inserting entry from line {count}");
+                                        throw new ArgumentException("Error inserting entry from line " + count.ToString());
                                     }
                                     break;
                                 case 2:
                                     if(!schedule.AddWeekly(name,duration,tax)){
-                                        throw new ArgumentException("Error inserting entry from line {count}");
+                                        throw new ArgumentException("Error inserting entry from line " + count.ToString());
                                     }
                                     break;
                                 case 3:
                                     if(!schedule.AddMonthly(name,duration,tax)){
-                                        throw new ArgumentException("Error inserting entry from line {count}");
+                                        throw new ArgumentException("Error inserting entry from line " + count.ToString());
                                     }
                                     break;
                                 case 4:
                                     if(!schedule.AddYearly(name,duration,tax)){
-                                        throw new ArgumentException("Error inserting entry from line {count}");
+                                        throw new ArgumentException("Error inserting entry from line " + count.ToString());
                                     }
                                     break;
                             }
