@@ -1,14 +1,20 @@
 How to run the code:
+'dotnet run' should execute the program.
+
+If anything should fail during execution please change your locale (language) settings to en-DK.
+
+The program will try to import from TaxSchedule.sqlite. If this fails for any reason it will default to trying to parse the file "municipalities.txt".
+
+Press H or T in the program for help or a tutorial on how to use the program.
 
 
 
 
 
 
+Municipalitiy names are case-insensitive.
 
 
-
-Municipalitiy names is case-insensitive. 
 
 Assumptions about how the code is to work:
 From the example in the case text there are a few things that are not stated clearly which have led to these assumptions.
@@ -18,4 +24,14 @@ Daily
 Weekly
 Monthly
 Yearly
-Daily tax overshadows weekly, monthly and yearly tax, like weekly overshadows monthly and yearly etc. So on a day with a daily tax no other tax will be calculated and on a day with no daily tax but with a weekly tax only this will be calculated.
+Daily tax overshadows weekly, monthly and yearly tax, like weekly overshadows monthly and yearly, etc. So on a day with a daily tax no other tax will be calculated and on a day with no daily tax but with a weekly tax only this will be calculated.
+
+
+
+Further work:
+Extending the database system to not add duplicates to the database.
+Allowing updates directly to the database
+Allowing updates/removals of records, these should also be implemented for the database when updating this.
+A regular commandline API
+Deploying as a self-hosted service.
+More tests - always more tests

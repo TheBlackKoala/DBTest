@@ -8,9 +8,15 @@ namespace TaxSchedule
     {
         public static void Main(string[] args)
         {
-            var parser = new ParseFile("municipalities.txt");
+
             var schedule = new TaxSchedule();
-            schedule = parser.Parse(schedule);
+            if(!DatabaseClient.ReadFromDatabase(schedule)){
+                Console.WriteLine("There was something wrong while reading from the database, please fix this");
+                Console.WriteLine("We will try to use the file 'municipalities.txt' instead");
+                schedule = new TaxSchedule();
+                var parser = new ParseFile("municipalities.txt");
+                schedule = parser.Parse(schedule);
+            }
             float res = schedule.GetTax("Copenhagen",new DateTime(2016,01,01));
             Console.WriteLine(res);
             res = schedule.GetTax("Copenhagen",new DateTime(2016,12,25));
@@ -21,8 +27,13 @@ namespace TaxSchedule
             Console.WriteLine(res);
             res = schedule.GetTax("Copenhagen",new DateTime(2016,03,16));
             Console.WriteLine(res);
+
+            DatabaseClient.WriteToDatabase(schedule);
+            /*
             var client = new Client(schedule);
             client.StartActivity();
+            */
+            Console.WriteLine(System.Globalization.CultureInfo.CurrentCulture);
         }
     }
 }

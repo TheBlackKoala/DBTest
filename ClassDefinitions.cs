@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace TaxSchedule
 {
@@ -12,16 +13,24 @@ namespace TaxSchedule
             this.end=end;
         }
 
+        public DateTime GetStart(){
+            return this.start;
+        }
+
+        public DateTime GetEnd(){
+            return this.end;
+        }
+
         public Boolean IsDuring(DateTime currentDate){
             return (this.start <= currentDate) && (currentDate <= this.end);
         }
     }
 
     public class Municipality{
-        private List<(DateTimeRange, float)> daily;
-        private List<(DateTimeRange, float)> weekly;
-        private List<(DateTimeRange, float)> monthly;
-        private List<(DateTimeRange, float)> yearly;
+        private List<(DateTimeRange, float)> daily {get;}
+        private List<(DateTimeRange, float)> weekly {get;}
+        private List<(DateTimeRange, float)> monthly {get;}
+        private List<(DateTimeRange, float)> yearly {get;}
 
         public Municipality(){
             this.daily=new List<(DateTimeRange, float)>();
@@ -40,6 +49,53 @@ namespace TaxSchedule
             this.monthly=monthly;
             this.yearly=yearly;
         }
+
+        //Generate SQL from the lists of data. Needs its own name as input
+        public string GenerateSQL(string name){
+            string sql = "";
+            string type = "daily";
+            foreach((DateTimeRange time, float tax) in daily){
+                sql += string.Format("('{0}', '{1}', '{2}', '{3}', {4}), ",
+                                     name,
+                                     type,
+                                     time.GetStart().ToString("yyyy.MM.dd",CultureInfo.InvariantCulture),
+                                     time.GetEnd().ToString("yyyy.MM.dd",CultureInfo.InvariantCulture),
+                                     tax.ToString(CultureInfo.InvariantCulture)
+                );
+            }
+            type = "weekly";
+            foreach((DateTimeRange time, float tax) in weekly){
+                sql += string.Format("('{0}', '{1}', '{2}', '{3}', {4}), ",
+                                     name,
+                                     type,
+                                     time.GetStart().ToString("yyyy.MM.dd",CultureInfo.InvariantCulture),
+                                     time.GetEnd().ToString("yyyy.MM.dd",CultureInfo.InvariantCulture),
+                                     tax.ToString(CultureInfo.InvariantCulture)
+                );
+            }
+            type = "monthly";
+            foreach((DateTimeRange time, float tax) in monthly){
+                sql += string.Format("('{0}', '{1}', '{2}', '{3}', {4}), ",
+                                     name,
+                                     type,
+                                     time.GetStart().ToString("yyyy.MM.dd",CultureInfo.InvariantCulture),
+                                     time.GetEnd().ToString("yyyy.MM.dd",CultureInfo.InvariantCulture),
+                                     tax.ToString(CultureInfo.InvariantCulture)
+                );
+            }
+            type = "yearly";
+            foreach((DateTimeRange time, float tax) in yearly){
+                sql += string.Format("('{0}', '{1}', '{2}', '{3}', {4}), ",
+                                     name,
+                                     type,
+                                     time.GetStart().ToString("yyyy.MM.dd",CultureInfo.InvariantCulture),
+                                     time.GetEnd().ToString("yyyy.MM.dd",CultureInfo.InvariantCulture),
+                                     tax.ToString(CultureInfo.InvariantCulture)
+                );
+            }
+            return sql;
+        }
+
 
         public float GetTax(DateTime currentDate){
             //Check daily
@@ -92,7 +148,7 @@ namespace TaxSchedule
 
     public class TaxSchedule{
         //All municipality names need to be uppercase, this is to make the names case-insensitive
-        private Dictionary<string, Municipality> municipalities;
+        private Dictionary<string, Municipality> municipalities{get;}
 
         public TaxSchedule(){
             this.municipalities = new Dictionary<string, Municipality>();
@@ -100,6 +156,20 @@ namespace TaxSchedule
 
         public TaxSchedule(Dictionary<string, Municipality> municipalities){
             this.municipalities = municipalities;
+        }
+
+        public string GenerateSQL(){
+            string sql = "";
+            //Iterate over municipalities
+            foreach(KeyValuePair<string, Municipality> municipality in municipalities){
+                //Iterate over each tax-type
+                //The municipality does not know it's own name so it needs that info
+                string name = municipality.Key;
+                sql += municipality.Value.GenerateSQL(name);
+            }
+            //Remove the last ", "
+            sql = sql.Substring(0,sql.Length-2);
+            return sql;
         }
 
         //Add a municipality, returns true if it succeeded, false otherwise.

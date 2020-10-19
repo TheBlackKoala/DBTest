@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace TaxSchedule
 {
@@ -12,7 +13,7 @@ namespace TaxSchedule
         }
 
         public static DateTime StringToDate(string date){
-            return DateTime.ParseExact(date, "yyyy.MM.dd", System.Globalization.CultureInfo.InvariantCulture);
+            return DateTime.ParseExact(date, "yyyy.MM.dd", CultureInfo.InvariantCulture);
         }
 
         public static DateTimeRange StringsToDuration(string start, string end){
@@ -66,7 +67,7 @@ namespace TaxSchedule
                                     //Create the duration
                                     duration = StringsToDuration(ls[0],ls[1]);
                                     //Find the tax value
-                                    tax = float.Parse(ls[2]);
+                                    tax = float.Parse(ls[2],CultureInfo.InvariantCulture);
                                 }
                                 catch(FormatException){
                                     throw new System.ArgumentException("Error converting date or tax on line " + count.ToString());

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace TaxSchedule
 {
@@ -34,8 +35,8 @@ namespace TaxSchedule
             Console.WriteLine("The names are not case sensitive and need to be unique");
             Console.WriteLine("Dates are in the format YYYY.MM.DD");
             Console.WriteLine("For example the 1st of april 2016 will be 2016.04.01");
-            Console.WriteLine("The tax format is N,N.");
-            Console.WriteLine("For example a tax level could be 0,2");
+            Console.WriteLine("The tax format is N.N.");
+            Console.WriteLine("For example a tax level could be 0.2");
             //Finding tax tutorial
             Console.WriteLine("Enter C to check a tax");
             Console.WriteLine("You need to enter a municipality and date and the tax in the given municipality on the given day will be shown");
@@ -48,7 +49,7 @@ namespace TaxSchedule
             Console.WriteLine("The line \"Daily\" will mark the start of Daily records");
             Console.WriteLine("Likewise \"Weekly\", \"Monthly\" or \"Yearly\" will start the appropriate records");
             Console.WriteLine("After this comes the date and tax info: start-date end-date tax");
-            Console.WriteLine("The date formats are YYYY.MM.DD and the tax format is N,N");
+            Console.WriteLine("The date formats are YYYY.MM.DD and the tax format is N.N");
             Console.WriteLine("A line could look like this:");
             Console.WriteLine("2016.01.01 2016.01.01 0,2");
             Console.WriteLine("When the records for the given municipality are done the last line has to be \"End\" to mark the end of the current Municipality");
@@ -77,7 +78,7 @@ namespace TaxSchedule
 
             //Parse the date and find the tax
             try{
-                DateTime time = DateTime.ParseExact(date, "yyyy.MM.dd", System.Globalization.CultureInfo.InvariantCulture);
+                DateTime time = DateTime.ParseExact(date, "yyyy.MM.dd", CultureInfo.InvariantCulture);
                 float res = schedule.GetTax(name,time);
                 Console.WriteLine("The tax in {0}, on {1} is: {2}", name, time.ToString("yyyy.MM.dd"), res);
             }
@@ -111,14 +112,14 @@ namespace TaxSchedule
             if(!ReceiveInput(out end)){
                 return false;
             }
-            Console.WriteLine("Please enter the level of the tax in the format of N,N");
+            Console.WriteLine("Please enter the level of the tax in the format of N.N");
             string level = "";
             if(!ReceiveInput(out level)){
                 return false;
             }
             try{
                 //Parse the tax value into a float
-                tax = float.Parse(level);
+                tax = float.Parse(level,CultureInfo.InvariantCulture);
             }
             catch{
                 Console.WriteLine("Could not parse the tax given");
