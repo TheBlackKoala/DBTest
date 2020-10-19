@@ -28,12 +28,11 @@ namespace TaxSchedule
             res = schedule.GetTax("Copenhagen",new DateTime(2016,03,16));
             Console.WriteLine(res);
 
-            DatabaseClient.WriteToDatabase(schedule);
             /*
             var client = new Client(schedule);
             client.StartActivity();
             */
-            Console.WriteLine(System.Globalization.CultureInfo.CurrentCulture);
+            DatabaseClient.WriteToDatabase(schedule);
         }
     }
 }

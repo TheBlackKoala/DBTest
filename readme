@@ -1,5 +1,5 @@
 How to run the code:
-'dotnet run' should execute the program.
+Calling 'dotnet run' in the 'DBTest'-foldershould execute the program.
 
 If anything should fail during execution please change your locale (language) settings to en-DK.
 
@@ -8,11 +8,41 @@ The program will try to import from TaxSchedule.sqlite. If this fails for any re
 Press H or T in the program for help or a tutorial on how to use the program.
 
 
+When using the program make sure to adhere to the correct formats:
+Date: YYYY.MM.DD
+Tax: N.N
 
-
-
+And Imported files should look like described here (newlines and spaces included):
+*Municipality-name*
+*Daily, Weekly, Monthly or Yearly*
+*start-date* *end-date* *tax*
+*a new tax like the line above, daily, weekly, etc, or end, to note the start of a new municipality*
+An example could be:
+Copenhagen
+Daily
+2016.01.01 2016.01.01 0.1
+2016.12.25 2016.12.26 0.3
+Weekly
+2016.07.06 2016.08.06 0.5
+End
+Hoeje Taastrup
+Monthly
+2016.02.02 2016.03.02 0.9
+***end-of-file***
 
 Municipalitiy names are case-insensitive.
+Any tax-level can be any amount of time, so if a "yearly" tax is to be enforced before other taxes this can easily be done by adding it to the daily taxes. Therefore daily, weekly, monthly and yearly are solely which tax is enforced first
+
+
+
+
+Design notes:
+The design is made to be as general and re-usable as possible, building the different classes in layers for their functionality.
+
+When getting taxes, all entries into the given municipality may have to be looked through. To avoid unnessecary accesses the daily-taxes are looked through first because these are used instead of any other, then weekly, monthly and yearly.
+Because the list is looked through in a non-dependent way each list look-through could be parallelized trivially, with only the loss of determinism if two entries in the same list have the same date covered.
+
+
 
 
 
@@ -32,6 +62,7 @@ Further work:
 Extending the database system to not add duplicates to the database.
 Allowing updates directly to the database
 Allowing updates/removals of records, these should also be implemented for the database when updating this.
+Moving from Lists in Municipalities to Arrays - it will require more handling but will increase speed
 A regular commandline API
 Deploying as a self-hosted service.
 More tests - always more tests
