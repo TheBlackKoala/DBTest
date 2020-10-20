@@ -229,6 +229,7 @@ namespace TaxSchedule
             using (StreamReader file = File.OpenText("./readme")){
                 Console.Write(file.ReadToEnd());
             }
+            Console.WriteLine();
         }
 
         public void StartActivity(){

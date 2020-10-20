@@ -1,5 +1,5 @@
 How to run the code:
-Calling 'dotnet run' in the 'DBTest'-foldershould execute the program.
+Calling 'dotnet run' in the 'DBTest'-folder should execute the program.
 
 If anything should fail during execution please change your locale (language) settings to en-DK.
 
@@ -39,7 +39,7 @@ Any tax-level can be any amount of time, so if a "yearly" tax is to be enforced 
 Design notes:
 The design is made to be as general and re-usable as possible, building the different classes in layers for their functionality.
 
-When getting taxes, all entries into the given municipality may have to be looked through. To avoid unnessecary accesses the daily-taxes are looked through first because these are used instead of any other, then weekly, monthly and yearly.
+When getting taxes, all entries into the given municipality may have to be looked through. To avoid unnecessary accesses the daily-taxes are looked through first because these are used instead of any other, then weekly, monthly and yearly.
 Because the list is looked through in a non-dependent way each list look-through could be parallelized trivially, with only the loss of determinism if two entries in the same list have the same date covered.
 
 
@@ -47,7 +47,7 @@ Because the list is looked through in a non-dependent way each list look-through
 
 
 Assumptions about how the code is to work:
-From the example in the case text there are a few things that are not stated clearly which have led to these assumptions.
+From the example in the case text the following hierarchy of taxes can be deducted.
 
 There are four different taxes:
 Daily
@@ -59,10 +59,11 @@ Daily tax overshadows weekly, monthly and yearly tax, like weekly overshadows mo
 
 
 Further work:
-Extending the database system to not add duplicates to the database.
-Allowing updates directly to the database
-Allowing updates/removals of records, these should also be implemented for the database when updating this.
-Moving from Lists in Municipalities to Arrays - it will require more handling but will increase speed
-A regular commandline API
+Extending the database system to not add duplicates to the database. This could be handled at Database level or by adding a boolean to keep track of whether the value has been added to the database.
+Allowing updates directly to the database - this would be most suited for the command-line API.
+Allowing updates/removals of records, these should also be implemented for the database when updating this. Like removing duplicates this could also be noted by a boolean or by combining both into a state - denoting the state of the value.
+Moving from Lists in Municipalities to Arrays - it will require more handling but will increase speed. This requires checks for the size of memory etc but will ensure that the memory is coalesced.
+A regular command-line API. Something like the client but made to receive each call by itself.
 Deploying as a self-hosted service.
+Make the tests unit tests. I am not currently familiar with a unit-test framework in C#.
 More tests - always more tests

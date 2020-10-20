@@ -7,13 +7,16 @@ using System.Globalization;
 namespace TaxSchedule
 {
     public class DatabaseClient{
+        private string path;
         private TaxSchedule schedule{get;}
 
-        public DatabaseClient(TaxSchedule schedule){
+        public DatabaseClient(TaxSchedule schedule, string path){
+            this.path = path;
             this.schedule = schedule;
         }
 
-        public DatabaseClient(){
+        public DatabaseClient(string path){
+            this.path = path;
             this.schedule=new TaxSchedule();
         }
 
@@ -21,13 +24,13 @@ namespace TaxSchedule
             return ReadFromDatabase(this.schedule);
         }
 
-        public static bool ReadFromDatabase(TaxSchedule schedule){
-            if (!File.Exists("TaxSchedule.sqlite")){
+        public bool ReadFromDatabase(TaxSchedule schedule){
+            if (!File.Exists(path)){
                 return false;
             }
 
             //Open a connection to the database
-            string cs = "Data Source=TaxSchedule.sqlite";
+            string cs = "Data Source="+path;
             SQLiteConnection con = new SQLiteConnection(cs);
             con.Open();
 
@@ -75,14 +78,14 @@ namespace TaxSchedule
             return WriteToDatabase(this.schedule);
         }
 
-        public static bool WriteToDatabase(TaxSchedule schedule){
+        public bool WriteToDatabase(TaxSchedule schedule){
             //Create/overwrite the database. This is to avoid duplicates
-            bool create = !File.Exists("TaxSchedule.sqlite");
+            bool create = !File.Exists(path);
             if(create){
-                SQLiteConnection.CreateFile("TaxSchedule.sqlite");
+                SQLiteConnection.CreateFile(path);
             }
             //Open a connection to the database
-            string cs = "Data Source=TaxSchedule.sqlite";
+            string cs = "Data Source="+path;
             SQLiteConnection con = new SQLiteConnection(cs);
             con.Open();
             string sql;
