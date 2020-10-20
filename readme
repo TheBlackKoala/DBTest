@@ -42,7 +42,7 @@ The design is made to be as general and re-usable as possible, building the diff
 When getting taxes, all entries into the given municipality may have to be looked through. To avoid unnecessary accesses the daily-taxes are looked through first because these are used instead of any other, then weekly, monthly and yearly.
 Because the list is looked through in a non-dependent way each list look-through could be parallelized trivially, with only the loss of determinism if two entries in the same list have the same date covered.
 
-
+Ideas on how to make the design better is in the section: Further work.
 
 
 
